@@ -255,6 +255,31 @@ static gboolean resist_size_window(Rect window, Rect target, gint resist,
                 break;
             }
         }
+        if (snapx) {
+            /* try to corner snap to the window */
+            switch (dir) {
+            case OB_DIRECTION_SOUTH:
+            case OB_DIRECTION_SOUTHWEST:
+            case OB_DIRECTION_SOUTHEAST:
+            case OB_DIRECTION_EAST:
+            case OB_DIRECTION_WEST:
+                dlt = t;
+                drb = b + *h - orgh;
+                if (b <= tb && drb >= tb &&
+                    drb < tb + resist)
+                    *h = tb - t + 1, snapy = TRUE;
+                break;
+            case OB_DIRECTION_NORTH:
+            case OB_DIRECTION_NORTHWEST:
+            case OB_DIRECTION_NORTHEAST:
+                dlt = t - *h + orgh;
+                drb = b;
+                if (t >= tt && dlt <= tt &&
+                    dlt > tt - resist)
+                    *h = b - tt + 1, snapy = TRUE;
+                break;
+            }
+        }
     }
 
     if (!snapy) {
@@ -280,6 +305,31 @@ static gboolean resist_size_window(Rect window, Rect target, gint resist,
                 if (t > tb && dlt <= tb &&
                     dlt > tb - resist)
                     *h = b - tb, snapy = TRUE;
+                break;
+            }
+        }
+        if (snapy) {
+            /* try to corner snap to the window */
+            switch (dir) {
+            case OB_DIRECTION_EAST:
+            case OB_DIRECTION_NORTHEAST:
+            case OB_DIRECTION_SOUTHEAST:
+            case OB_DIRECTION_NORTH:
+            case OB_DIRECTION_SOUTH:
+                dlt = l;
+                drb = r + *w - orgw;
+                if (r <= tr && drb >= tr &&
+                    drb < tr + resist)
+                    *w = tr - l + 1, snapx = TRUE;
+                break;
+            case OB_DIRECTION_WEST:
+            case OB_DIRECTION_NORTHWEST:
+            case OB_DIRECTION_SOUTHWEST:
+                dlt = l - *w + orgw;
+                drb = r;
+                if (l >= tl && dlt <= tl &&
+                    dlt > tl - resist)
+                    *w = r - tl + 1, snapx = TRUE;
                 break;
             }
         }
