@@ -338,7 +338,7 @@ void resist_size_monitors(ObClient *c, gint resist, gint *w, gint *h,
     t = RECT_TOP(c->frame->area);
     b = RECT_BOTTOM(c->frame->area);
 
-    RECT_SET(desired_area, c->area.x, c->area.y, *w, *h);
+    RECT_SET(desired_area, c->area.x, c->area.y, *w - resist, *h - resist);
 
     for (i = 0; i < screen_num_monitors; ++i) {
         parea = screen_physical_area_monitor(i);
