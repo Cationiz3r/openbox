@@ -744,6 +744,8 @@ void screen_add_desktop(gboolean current)
 {
     gulong ignore_start;
 
+    if (config_desktop_maximum > 0 && screen_num_desktops >= config_desktop_maximum) return;
+
     /* ignore enter events caused by this */
     ignore_start = event_start_ignore_all_enters();
 

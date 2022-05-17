@@ -65,6 +65,7 @@ RrFont *config_font_inactiveosd;
 guint   config_desktops_num;
 GSList *config_desktops_names;
 guint   config_screen_firstdesk;
+guint   config_desktop_maximum;
 guint   config_desktop_popup_time;
 
 gboolean         config_resize_redraw;
@@ -810,6 +811,11 @@ static void parse_desktops(xmlNodePtr node, gpointer d)
         if (d > 0)
             config_screen_firstdesk = (unsigned) d;
     }
+    if ((n = obt_xml_find_node(node, "maximum"))) {
+        gint d = obt_xml_node_int(n);
+        if (d >= 0)
+            config_desktop_maximum = (unsigned) d;
+    }
     if ((n = obt_xml_find_node(node, "names"))) {
         GSList *it;
         xmlNodePtr nname;
@@ -1128,6 +1134,7 @@ void config_startup(ObtXmlInst *i)
 
     config_desktops_num = 4;
     config_screen_firstdesk = 1;
+    config_desktop_maximum = 0;
     config_desktops_names = NULL;
     config_desktop_popup_time = 875;
 
