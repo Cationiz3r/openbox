@@ -35,6 +35,7 @@ static gboolean resist_move_window(Rect window,
     gint cl, ct, cr, cb; /* current edges */
     gint w, h; /* current size */
     gint tl, tt, tr, tb; /* 1 past the target's edges on each side */
+    gint p = config_resist_padding; /* padding to target's edge on each side */
     gboolean snapx = 0, snapy = 0;
 
     w = window.width;
@@ -50,9 +51,9 @@ static gboolean resist_move_window(Rect window,
     cr = RECT_RIGHT(window);
     cb = RECT_BOTTOM(window);
 
-    tl = RECT_LEFT(target) - 1;
+    tl = RECT_LEFT(target) - 1 - p;
     tt = RECT_TOP(target) - 1;
-    tr = RECT_RIGHT(target) + 1;
+    tr = RECT_RIGHT(target) + 1 + p;
     tb = RECT_BOTTOM(target) + 1;
 
     /* snapx and snapy ensure that the window snaps to the top-most
@@ -77,6 +78,12 @@ static gboolean resist_move_window(Rect window,
             }
         }
     }
+
+    tl = RECT_LEFT(target) - 1;
+    tt = RECT_TOP(target) - 1 - p;
+    tr = RECT_RIGHT(target) + 1;
+    tb = RECT_BOTTOM(target) + 1 + p;
+
     if (!snapy) {
         if (cl < tr && cr > tl) {
             if (ct >= tb && t < tb && t >= tb - resist)
@@ -213,6 +220,7 @@ static gboolean resist_size_window(Rect window, Rect target, gint resist,
     gint l, t, r, b; /* my left, top, right and bottom sides */
     gint tl, tt, tr, tb; /* target's left, top, right and bottom bottom sides*/
     gint dlt, drb; /* my destination left/top and right/bottom sides */
+    gint p = config_resist_padding; /* padding to target's edge on each side */
     gboolean snapx = 0, snapy = 0;
     gint orgw, orgh;
 
@@ -224,9 +232,9 @@ static gboolean resist_size_window(Rect window, Rect target, gint resist,
     orgw = window.width;
     orgh = window.height;
 
-    tl = RECT_LEFT(target);
+    tl = RECT_LEFT(target) - p;
     tt = RECT_TOP(target);
-    tr = RECT_RIGHT(target);
+    tr = RECT_RIGHT(target) + p;
     tb = RECT_BOTTOM(target);
 
     if (!snapx) {
@@ -281,6 +289,11 @@ static gboolean resist_size_window(Rect window, Rect target, gint resist,
             }
         }
     }
+
+    tl = RECT_LEFT(target);
+    tt = RECT_TOP(target) - p;
+    tr = RECT_RIGHT(target);
+    tb = RECT_BOTTOM(target) + p;
 
     if (!snapy) {
         /* vertical snapping */

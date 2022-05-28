@@ -104,6 +104,7 @@ gboolean config_menu_show_icons;
 
 GSList *config_menu_files;
 
+gint     config_resist_padding;
 gint     config_resist_win;
 gint     config_resist_edge;
 
@@ -997,6 +998,8 @@ static void parse_resistance(xmlNodePtr node, gpointer d)
     xmlNodePtr n;
 
     node = node->children;
+    if ((n = obt_xml_find_node(node, "padding")))
+        config_resist_padding = obt_xml_node_int(n);
     if ((n = obt_xml_find_node(node, "strength")))
         config_resist_win = obt_xml_node_int(n);
     if ((n = obt_xml_find_node(node, "screen_edge_strength")))
@@ -1180,6 +1183,7 @@ void config_startup(ObtXmlInst *i)
 
     obt_xml_register(i, "mouse", parse_mouse, NULL);
 
+    config_resist_padding = 0;
     config_resist_win = 10;
     config_resist_edge = 20;
 

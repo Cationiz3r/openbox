@@ -200,6 +200,8 @@ extern gint config_mouse_screenedgetime;
   switching desktops from bumping the screen edge */
 extern gboolean config_mouse_screenedgewarp;
 
+/*! Number of pixels to pad to another window's edge while crossing it */
+extern gint config_resist_padding;
 /*! Number of pixels to resist while crossing another window's edge */
 extern gint config_resist_win;
 /*! Number of pixels to resist while crossing a screen's edge */

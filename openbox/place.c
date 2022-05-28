@@ -432,12 +432,19 @@ static gboolean place_least_overlap(ObClient *c, Rect *head, int *x, int *y,
         GSList* it;
         Point result;
         guint i = 0;
+        gint p = config_resist_padding;
 
         if (!config_dock_hide)
             dock_get_area(&client_rects[i++]);
         for (it = potential_overlap_clients; it != NULL; it = g_slist_next(it)) {
             ObClient* potential_overlap_client = (ObClient*)it->data;
             client_rects[i] = potential_overlap_client->frame->area;
+            if (p) {
+                client_rects[i].x -= p;
+                client_rects[i].y -= p;
+                client_rects[i].width += 2*p;
+                client_rects[i].height += 2*p;
+            }
             i += 1;
         }
         g_slist_free(potential_overlap_clients);
