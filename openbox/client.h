@@ -69,6 +69,18 @@ typedef enum
     OB_CLIENT_FUNC_UNDECORATE = 1 << 9  /*!< Allow to be undecorated */
 } ObFunctions;
 
+/*! Snapping types */
+typedef enum
+{
+    OB_CLIENT_SNAP_NONE,
+    OB_CLIENT_SNAP_LEFT,
+    OB_CLIENT_SNAP_TOPLEFT,
+    OB_CLIENT_SNAP_BOTTOMLEFT,
+    OB_CLIENT_SNAP_RIGHT,
+    OB_CLIENT_SNAP_TOPRIGHT,
+    OB_CLIENT_SNAP_BOTTOMRIGHT
+} ObSnapType;
+
 struct _ObClient
 {
     ObWindow obwin;
@@ -154,6 +166,8 @@ struct _ObClient
     /*! Remember if the window was maximized before going fullscreen */
     gboolean pre_fullscreen_max_horz,
              pre_fullscreen_max_vert;
+    /*! Position and size of the window prior to being snapped */
+    Rect pre_snap_area;
 
     /*! The window's strut
       The strut defines areas of the screen that are marked off-bounds for
@@ -268,6 +282,8 @@ struct _ObClient
     gboolean max_vert;
     /*! The window is maximized to fill the screen horizontally */
     gboolean max_horz;
+    /*! The window is snapped to fill a half or quarter of the screen */
+    ObSnapType snaptype;
     /*! The window should not be displayed by pagers */
     gboolean skip_pager;
     /*! The window should not be displayed by taskbars */
@@ -529,6 +545,14 @@ void client_iconify(ObClient *self, gboolean iconic, gboolean curdesk,
   @param dir 0 to set both horz and vert, 1 to set horz, 2 to set vert.
 */
 void client_maximize(ObClient *self, gboolean max, gint dir);
+
+/*! Snap the client window to a half or quarter depending on previous snap
+  @param right true to snap to the right, false to snap to the left
+*/
+void client_snap(ObClient *self, gboolean right);
+
+/*! Unsnap the client window without changing back to original size */
+void client_unsnap(ObClient *self);
 
 /*! Shades or unshades the client window
   @param shade true if the window should be shaded; false if it should be

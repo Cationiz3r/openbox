@@ -234,6 +234,7 @@ openbox_openbox_SOURCES = \
 	openbox/actions/shadelowerraise.c \
 	openbox/actions/showdesktop.c \
 	openbox/actions/showmenu.c \
+	openbox/actions/snap.c \
 	openbox/actions/unfocus.c \
 	openbox/actions.c \
 	openbox/actions.h \

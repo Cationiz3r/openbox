@@ -3047,6 +3047,52 @@ void client_try_configure(ObClient *self, gint *x, gint *y, gint *w, gint *h,
                          is maximizing */
 
         g_slice_free(Rect, a);
+    } else if (self->snaptype) {
+        const Rect *p;
+        Rect *a;
+        guint i, pad;
+
+        /* use all possible struts when snapping for consistency */
+        i = screen_find_monitor(&desired);
+        a = screen_area(self->desktop, i, NULL);
+        p = screen_physical_area_monitor(i);
+
+        /* Use window padding to space windout out */
+        pad = config_resist_padding;
+
+        switch (self->snaptype) { /* horz: middle of physical screen */
+        case OB_CLIENT_SNAP_LEFT:
+        case OB_CLIENT_SNAP_TOPLEFT:
+        case OB_CLIENT_SNAP_BOTTOMLEFT:
+            *x = a->x;
+            *w = (p->width - pad)/2 - a->x - self->frame->size.left - self->frame->size.right;
+            break;
+        case OB_CLIENT_SNAP_RIGHT:
+        case OB_CLIENT_SNAP_TOPRIGHT:
+        case OB_CLIENT_SNAP_BOTTOMRIGHT:
+            *x = (p->width + pad)/2;
+            *w = a->x + a->width - (p->width + pad)/2 - self->frame->size.left - self->frame->size.right;
+            break;
+        }
+        switch (self->snaptype) { /* vert: middle of area */
+        case OB_CLIENT_SNAP_RIGHT:
+        case OB_CLIENT_SNAP_LEFT:
+            *y = a->y;
+            *h = a->height - self->frame->size.top - self->frame->size.bottom;
+            break;
+        case OB_CLIENT_SNAP_TOPRIGHT:
+        case OB_CLIENT_SNAP_TOPLEFT:
+            *y = a->y;
+            *h = (a->height - pad)/2 - self->frame->size.top - self->frame->size.bottom;
+            break;
+        case OB_CLIENT_SNAP_BOTTOMRIGHT:
+        case OB_CLIENT_SNAP_BOTTOMLEFT:
+            *y = a->y + (a->height + pad)/2;
+            *h = (a->height - pad)/2 - self->frame->size.top - self->frame->size.bottom;
+            break;
+        }
+
+        g_slice_free(Rect, a);
     }
 
     /* gets the client's position */
@@ -3541,6 +3587,81 @@ void client_maximize(ObClient *self, gboolean max, gint dir)
 
     client_setup_decor_and_functions(self, FALSE);
     client_move_resize(self, x, y, w, h);
+}
+
+void client_snap(ObClient *self, gboolean right)
+{
+    /* Do nothing if window is fullscreen */
+    if (self->fullscreen) return;
+
+    gint x, y, w, h;
+    ObSnapType s;
+
+    x = self->area.x;
+    y = self->area.y;
+    w = self->area.width;
+    h = self->area.height;
+    s = self->snaptype;
+
+    /* Unmaximize client before any snapping takes place */
+    client_maximize(self, FALSE, 0);
+
+    /* Store window size if initially unsnapped */
+    if (!s)
+        RECT_SET(self->pre_snap_area,
+                 self->area.x,     self->area.y,
+                 self->area.width, self->area.height);
+
+    /* Determine the next state when snapping */
+    ObSnapType ObSnapLeft[] =
+    {
+        OB_CLIENT_SNAP_LEFT,
+        OB_CLIENT_SNAP_TOPLEFT,
+        OB_CLIENT_SNAP_BOTTOMLEFT,
+        OB_CLIENT_SNAP_NONE,
+        OB_CLIENT_SNAP_LEFT,
+        OB_CLIENT_SNAP_LEFT,
+        OB_CLIENT_SNAP_LEFT
+    };
+    ObSnapType ObSnapRight[] =
+    {
+        OB_CLIENT_SNAP_RIGHT,
+        OB_CLIENT_SNAP_RIGHT,
+        OB_CLIENT_SNAP_RIGHT,
+        OB_CLIENT_SNAP_RIGHT,
+        OB_CLIENT_SNAP_TOPRIGHT,
+        OB_CLIENT_SNAP_BOTTOMRIGHT,
+        OB_CLIENT_SNAP_NONE
+    };
+    if (right) s = ObSnapRight[s];
+    else       s = ObSnapLeft[s];
+
+    /* Restore window size if unsnapping */
+    if (!s) {
+        g_assert(self->pre_snap_area.width > 0);
+        g_assert(self->pre_snap_area.height > 0);
+
+        x = self->pre_snap_area.x;
+        y = self->pre_snap_area.y;
+        w = self->pre_snap_area.width;
+        h = self->pre_snap_area.height;
+
+        RECT_SET(self->pre_snap_area, 0, 0, 0, 0);
+    }
+
+    /* update snaptype */
+    self->snaptype = s;
+
+    /* make sure the window is on some monitor */
+    client_find_onscreen(self, &x, &y, w, h, FALSE);
+    client_change_state(self); /* change the state hints on the client */
+    client_setup_decor_and_functions(self, FALSE);
+    client_move_resize(self, x, y, w, h);
+}
+void client_unsnap(ObClient *self)
+{
+    /* Client retain size/position after unsnapping */
+    self->snaptype = OB_CLIENT_SNAP_NONE;
 }
 
 void client_shade(ObClient *self, gboolean shade)
